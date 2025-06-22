@@ -3,7 +3,6 @@ import { openDb } from '../database.js';
 
 const router = express.Router();
 
-// Create Event (only for approved users)
 router.post('/', async (req, res) => {
   const { title, description, slots, maxBookingsPerSlot, userId, imageUrl } = req.body;
   if (!title || !Array.isArray(slots) || !maxBookingsPerSlot || !userId) {
@@ -11,14 +10,12 @@ router.post('/', async (req, res) => {
   }
   try {
     const db = await openDb();
-    // Validate slots are all in the future
     const now = new Date();
     for (const slot of slots) {
       if (new Date(slot) < now) {
         return res.status(400).json({ error: 'Cannot create events with past slots.' });
       }
     }
-    // Check if user is approved
     const userResult = await db.query('SELECT * FROM users WHERE email = $1 AND is_approved = 1', [userId]);
     const user = userResult.rows[0];
     if (!user) {
@@ -41,7 +38,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// List Events (ordered by position)
 router.get('/', async (req, res) => {
   try {
     const db = await openDb();
@@ -52,7 +48,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update event positions (admin only)
 router.post('/reorder', async (req, res) => {
   const { adminEmail, order } = req.body;
   if (adminEmail !== process.env.ADMIN_EMAIL) {
@@ -72,7 +67,6 @@ router.post('/reorder', async (req, res) => {
   }
 });
 
-// Get Event + Slots
 router.get('/:id', async (req, res) => {
   try {
     const db = await openDb();

@@ -50,7 +50,7 @@ function EventDetailsPage() {
         const end = start.plus({ hours: 1 });
         const details = {
           text: event.title,
-          dates: `${start.toFormat('yyyyMMdd\'T'HHmmss)}/${end.toFormat('yyyyMMdd\'T'HHmmss)}`,
+          dates: `${start.toFormat("yyyyMMdd'T'HHmmss")}/${end.toFormat("yyyyMMdd'T'HHmmss")}`,
           details: event.description || '',
           location: '',
         };

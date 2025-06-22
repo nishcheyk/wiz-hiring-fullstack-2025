@@ -1,7 +1,7 @@
 # BookWIZ – Event Booking App
 
 ## Overview
-BookWIZ is a fullstack event booking platform built with React (frontend), Express (backend), and PostgreSQL. It supports event creation, slot booking, admin event management, email confirmations, and Google Calendar sync (mocked).
+BookWIZ is a fullstack event booking platform built with React (frontend), Express (backend), and PostgreSQL. It supports event creation, slot booking, admin event management, event branding with image URL, and Google Calendar sync (mocked). No email confirmation is required or implemented.
 
 ---
 
@@ -9,7 +9,6 @@ BookWIZ is a fullstack event booking platform built with React (frontend), Expre
 - **Frontend:** React, Vite, Tailwind CSS
 - **Backend:** Node.js, Express
 - **Database:** PostgreSQL
-- **Email:** Nodemailer (SMTP)
 - **Deployment:** Render (backend) (frontend)
 
 ---
@@ -38,7 +37,6 @@ BookWIZ/
 - Event listing, details, and slot booking
 - Admin drag-and-drop event reordering
 - Event branding (image URL)
-- Email confirmation on booking (real email)
 - Google Calendar sync (mocked link)
 - My Bookings page
 - Admin user approval
@@ -48,7 +46,7 @@ BookWIZ/
 ## Getting Started (Local)
 
 ### Backend
-1. Copy `.env.example` to `.env` and fill in your PostgreSQL and SMTP credentials.
+1. Copy `.env.example` to `.env` and fill in your PostgreSQL credentials.
 2. Install dependencies:
    ```
    npm install
@@ -91,12 +89,6 @@ BookWIZ/
 PORT=5000
 DATABASE_URL=your_postgres_url
 ADMIN_EMAIL=admin@gmail.com
-SMTP_HOST=your_smtp_host
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=your@email.com
-SMTP_PASS=yourpassword
-SMTP_FROM=BookWIZ <your@email.com>
 ```
 
 ### Frontend (`frontend/.env.example`)
@@ -110,7 +102,6 @@ ADMIN_EMAIL=admin@gmail.com
 ## Bonus Features
 - Drag-and-drop event reordering (admin)
 - Google Calendar sync (mocked)
-- Real email confirmation
 - Event branding (image URL)
 
 ---
@@ -136,4 +127,4 @@ ADMIN_EMAIL=admin@gmail.com
 ---
 
 ## Contact
-For questions or support, contact the maintainer at `admin@gmail.com`.
+For questions or support, contact the maintainer at `nishcheycapture2014@gmail.com`.
