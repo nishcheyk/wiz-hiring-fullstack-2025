@@ -44,6 +44,7 @@ router.get('/', async (req, res) => {
     const result = await db.query('SELECT * FROM events ORDER BY position ASC, id ASC');
     res.json(result.rows);
   } catch (err) {
+    console.error('Error in GET /events:', err);
     res.status(500).json({ error: 'Failed to fetch events' });
   }
 });
