@@ -16,7 +16,26 @@ function CreateEventPage() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
       navigate('/login');
+      return;
     }
+    // Check if user is approved
+    (async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+          headers: { 'Authorization': userId }
+        });
+        if (!res.ok) {
+          navigate('/login');
+          return;
+        }
+        const user = await res.json();
+        if (!user.is_approved) {
+          navigate('/');
+        }
+      } catch {
+        navigate('/login');
+      }
+    })();
   }, [navigate]);
 
   const handleSlotChange = (i, value) => {
@@ -42,7 +61,7 @@ function CreateEventPage() {
         description,
         slots: slots.map(s => DateTime.fromISO(s).toUTC().toISO()),
         maxBookingsPerSlot,
-        userId
+        userId // userId is now used everywhere instead of userEmail
       });
       setMessage('Event created!');
     } catch (err) {

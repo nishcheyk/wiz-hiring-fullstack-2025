@@ -11,6 +11,13 @@ router.post('/', async (req, res) => {
   }
   try {
     const db = await openDb();
+    // Validate slots are all in the future
+    const now = new Date();
+    for (const slot of slots) {
+      if (new Date(slot) < now) {
+        return res.status(400).json({ error: 'Cannot create events with past slots.' });
+      }
+    }
     // Check if user is approved
     const user = await db.get('SELECT * FROM users WHERE email = ? AND is_approved = 1', [userId]);
     if (!user) {

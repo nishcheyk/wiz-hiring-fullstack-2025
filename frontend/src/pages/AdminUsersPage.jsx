@@ -10,15 +10,16 @@ function AdminUsersPage() {
   const navigate = useNavigate();
 
   // Get admin email from localStorage
-  const adminEmail = localStorage.getItem('adminEmail');
+  const userType = localStorage.getItem('userType');
+  const adminEmail = localStorage.getItem('userEmail');
 
   useEffect(() => {
-    if (!localStorage.getItem('adminLoggedIn')) {
-      navigate('/admin/login');
+    if (userType !== 'admin') {
+      navigate('/login');
       return;
     }
     fetchUsers();
-  }, [navigate]);
+  }, [navigate, userType]);
 
   const fetchUsers = async () => {
     try {
@@ -40,9 +41,8 @@ function AdminUsersPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminLoggedIn');
-    localStorage.removeItem('adminEmail');
-    navigate('/admin/login');
+    localStorage.clear();
+    navigate('/login');
   };
 
   return (

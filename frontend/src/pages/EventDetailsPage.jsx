@@ -49,6 +49,8 @@ function EventDetailsPage() {
     }
   };
 
+  const userEmail = localStorage.getItem('userEmail');
+
   return (
     <div className="main-content animate-fade-in">
       <div className="form-container">
@@ -71,7 +73,7 @@ function EventDetailsPage() {
               </form>
             ) : (
               <div style={{ marginBottom: 12 }}>
-                <CheckoutForm onSubmit={handleCheckout} />
+                <CheckoutForm onSubmit={handleCheckout} email={userEmail} />
                 <Button onClick={() => setShowCheckout(false)} style={{ marginTop: 10 }} type="button" variant="secondary">Cancel</Button>
               </div>
             )}

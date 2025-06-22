@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import axios from 'axios';
 
 function SignupPage() {
   const [email, setEmail] = useState('');
@@ -14,11 +15,13 @@ function SignupPage() {
       setMessage('Please enter email and password.');
       return;
     }
-    // Simulate user creation (in real app, call backend)
-    localStorage.setItem('userType', 'user');
-    localStorage.setItem('userEmail', email);
-    setMessage('Signup successful! You can now log in.');
-    setTimeout(() => navigate('/login'), 1200);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/users/signup`, { email, password });
+      setMessage('Signup successful! You can now log in.');
+      setTimeout(() => navigate('/login'), 1200);
+    } catch (err) {
+      setMessage(err.response?.data?.error || 'Signup failed.');
+    }
   };
 
   return (

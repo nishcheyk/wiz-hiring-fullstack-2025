@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import './AdminLoginPage.css';
 
+// This file is deprecated. Use LoginPage.jsx and /login for all authentication.
+
 function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,8 +13,10 @@ function AdminLoginPage() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // For demo: hardcoded admin credentials
-    if (email === 'admin@gmail.com' && password === 'admin') {
+    // For demo: get admin credentials from environment variables
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@gmail.com';
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin';
+    if (email === adminEmail && password === adminPassword) {
       localStorage.setItem('adminLoggedIn', 'true');
       localStorage.setItem('adminEmail', email);
       navigate('/admin/bookings');

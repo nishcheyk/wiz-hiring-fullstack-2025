@@ -40,4 +40,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+// User signup (prevent duplicate emails)
+router.post('/signup', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required.' });
+  }
+  try {
+    const db = await openDb();
+    const existing = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+    if (existing) {
+      return res.status(409).json({ error: 'Email already exists.' });
+    }
+    await db.run('INSERT INTO users (email, is_approved) VALUES (?, 0)', [email]);
+    res.status(201).json({ success: true, message: 'Signup successful. Await admin approval to add events.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to sign up.' });
+  }
+});
+
+// Get current user info (for approval check)
+router.get('/me', async (req, res) => {
+  const userEmail = req.headers['authorization'];
+  if (!userEmail) {
+    return res.status(401).json({ error: 'No user email provided.' });
+  }
+  try {
+    const db = await openDb();
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [userEmail]);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch user.' });
+  }
+});
+
 export default router;

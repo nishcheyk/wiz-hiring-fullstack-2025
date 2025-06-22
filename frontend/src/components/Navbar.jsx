@@ -35,10 +35,15 @@ function Navbar() {
       </div>
       <ul className="navbar-links">
         <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Events</Link></li>
+        {/* Only approved users (not admin) see Add Event */}
         {userType === 'user' && approved && (
           <li><Link to="/create" className={location.pathname === '/create' ? 'active' : ''}>Add Event</Link></li>
         )}
-        <li><Link to="/my-bookings" className={location.pathname === '/my-bookings' ? 'active' : ''}>My Bookings</Link></li>
+        {/* Only users (not admin) see My Bookings */}
+        {userType === 'user' && (
+          <li><Link to="/my-bookings" className={location.pathname === '/my-bookings' ? 'active' : ''}>My Bookings</Link></li>
+        )}
+        {/* Only admin sees admin links */}
         {userType === 'admin' && (
           <>
             <li><Link to="/admin/users" className={location.pathname === '/admin/users' ? 'active' : ''}>Admin</Link></li>
@@ -48,11 +53,12 @@ function Navbar() {
         {userType && (
           <li><button onClick={handleLogout} className="logout-btn">Logout</button></li>
         )}
-        {!userType && (
-          <>
-            <li><Link to="/login" className={location.pathname === '/login' ? 'active' : ''}>Login</Link></li>
-            <li><Link to="/signup" className={location.pathname === '/signup' ? 'active' : ''}>Sign Up</Link></li>
-          </>
+        {/* Only show login or signup, never both */}
+        {!userType && location.pathname !== '/signup' && (
+          <li><Link to="/login" className={location.pathname === '/login' ? 'active' : ''}>Login</Link></li>
+        )}
+        {!userType && location.pathname !== '/login' && (
+          <li><Link to="/signup" className={location.pathname === '/signup' ? 'active' : ''}>Sign Up</Link></li>
         )}
       </ul>
     </nav>
