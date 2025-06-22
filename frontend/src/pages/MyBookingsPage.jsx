@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Button from '../components/Button';
+import noBookings from '../assets/no-bookings.svg';
 
 function MyBookingsPage() {
   const [email, setEmail] = useState('');
@@ -13,24 +14,30 @@ function MyBookingsPage() {
   };
 
   return (
-    <div className="form-container animate-fade-in" style={{ maxWidth: 500, margin: '2rem auto' }}>
-      <h1 className="title mb-4">My Bookings</h1>
-      <form onSubmit={fetchBookings} className="form mb-4">
-        <div className="input-group">
-          <label>Enter your email</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-        </div>
-        <Button type="submit">View Bookings</Button>
-      </form>
-      <ul style={{ marginTop: 24 }}>
-        {bookings.map(b => (
-          <li key={b.id} className="bg-gray-800 animate-fade-in" style={{ border: '1px solid #444', padding: 16, marginBottom: 12, borderRadius: 8, background: '#23272f' }}>
-            <div><b>Event:</b> {b.title}</div>
-            <div><b>Slot:</b> {b.start_time}</div>
-            <div><b>Booked at:</b> {b.created_at}</div>
-          </li>
-        ))}
-      </ul>
+    <div className="main-content animate-fade-in">
+      <div className="form-container">
+        <h1 className="title mb-4" style={{ textAlign: 'left' }}>My Bookings</h1>
+        <form onSubmit={fetchBookings} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 }}>
+          <input type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required className="form-input" />
+          <Button type="submit">View Bookings</Button>
+        </form>
+        {bookings.length === 0 ? (
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <img src={noBookings} alt="No bookings" style={{ width: 120, opacity: 0.7 }} />
+            <div style={{ color: '#a78bfa', marginTop: 16, fontSize: 18 }}>No bookings found</div>
+          </div>
+        ) : (
+          <ul style={{ marginTop: 0, padding: 0, listStyle: 'none' }}>
+            {bookings.map(b => (
+              <li key={b.id} style={{ border: '1px solid #444', padding: 16, marginBottom: 12, borderRadius: 8, background: '#18181b', color: '#fff' }}>
+                <div><b>Event:</b> {b.title}</div>
+                <div><b>Slot:</b> {b.start_time}</div>
+                <div><b>Booked at:</b> {b.created_at}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,106 @@
+.hero-section {
+  width: 100vw;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #6366f1 0%, #a78bfa 100%);
+  color: #fff;
+  padding: 3rem 1rem 2rem 1rem;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+.hero-content {
+  z-index: 2;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(80,80,120,0.13);
+}
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  color: #f3f4f6;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.hero-visual {
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.hero-calendar-anim {
+  animation: floatUp 1.2s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes floatUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.calendar {
+  background: #18181b;
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.13);
+  padding: 1.5rem 2rem;
+  min-width: 220px;
+  margin-top: 1rem;
+}
+.calendar-header {
+  font-weight: 700;
+  color: #a78bfa;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.calendar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.calendar-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.calendar-cell {
+  background: #23272f;
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+  min-width: 40px;
+  transition: background 0.2s;
+}
+.calendar-cell.highlight {
+  background: #a78bfa;
+  color: #18181b;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .hero-section {
+    flex-direction: column;
+    min-height: 50vh;
+    padding: 2rem 0.5rem 1rem 0.5rem;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .calendar {
+    min-width: 160px;
+    padding: 1rem 0.5rem;
+  }
+}

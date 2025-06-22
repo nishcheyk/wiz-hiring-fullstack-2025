@@ -1,5 +1,5 @@
 import express from 'express';
-import { openDb } from './database.js';
+import { openDb } from '../database.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

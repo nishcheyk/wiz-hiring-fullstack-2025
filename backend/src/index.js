@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { migrate } from './database.js';
 import eventsRouter from './routes/events.js';
 import bookingsRouter from './routes/bookings.js';
+import usersRouter from './routes/users.js';
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 
 app.use('/events', eventsRouter);
 app.use('/', bookingsRouter);
+app.use('/users', usersRouter);
 
 // Run DB migrations on startup
 migrate();

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { DateTime } from 'luxon';
 import Button from '../components/Button';
@@ -9,6 +10,14 @@ function CreateEventPage() {
   const [slots, setSlots] = useState(['']);
   const [maxBookingsPerSlot, setMaxBookingsPerSlot] = useState(1);
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleSlotChange = (i, value) => {
     const newSlots = [...slots];
@@ -22,12 +31,18 @@ function CreateEventPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      setMessage('You must be logged in to create an event.');
+      return;
+    }
     try {
       await axios.post(import.meta.env.VITE_API_URL + '/events', {
         title,
         description,
         slots: slots.map(s => DateTime.fromISO(s).toUTC().toISO()),
-        maxBookingsPerSlot
+        maxBookingsPerSlot,
+        userId
       });
       setMessage('Event created!');
     } catch (err) {
@@ -36,34 +51,27 @@ function CreateEventPage() {
   };
 
   return (
-    <div className="form-container animate-fade-in" style={{ maxWidth: 500, margin: '2rem auto' }}>
-      <h1 className="title mb-4">Create Event</h1>
-      <form onSubmit={handleSubmit} className="form">
-        <div className="input-group">
-          <label>Title</label>
-          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-        </div>
-        <div className="input-group">
-          <label>Description</label>
-          <textarea value={description} onChange={e => setDescription(e.target.value)} className="mb-2 block w-full bg-gray-900 text-white rounded" />
-        </div>
-        <div className="input-group">
-          <label>Max bookings per slot</label>
-          <input type="number" min="1" value={maxBookingsPerSlot} onChange={e => setMaxBookingsPerSlot(Number(e.target.value))} required />
-        </div>
-        <div className="mb-2">
-          <div className="font-semibold">Slots (local time):</div>
-          {slots.map((slot, i) => (
-            <div key={i} className="flex mb-1" style={{ display: 'flex', marginBottom: 8 }}>
-              <input type="datetime-local" value={slot} onChange={e => handleSlotChange(i, e.target.value)} required className="flex-1 bg-gray-900 text-white rounded" style={{ flex: 1 }} />
-              <button type="button" onClick={() => removeSlot(i)} className="ml-2 text-red-400" style={{ marginLeft: 8, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
-            </div>
-          ))}
-          <button type="button" onClick={addSlot} className="mt-1 text-purple-300" style={{ marginTop: 8, color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer' }}>Add Slot</button>
-        </div>
-        <Button type="submit">Create Event</Button>
-      </form>
-      {message && <div className="mt-2 text-green-400 animate-bounce-in" style={{ color: '#34d399', marginTop: 12 }}>{message}</div>}
+    <div className="main-content animate-fade-in">
+      <div className="form-container">
+        <h1 className="title mb-4" style={{ textAlign: 'left' }}>Create Event</h1>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required className="form-input" />
+          <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="form-input" style={{ minHeight: 60 }} />
+          <input type="number" min="1" placeholder="Max bookings per slot" value={maxBookingsPerSlot} onChange={e => setMaxBookingsPerSlot(Number(e.target.value))} required className="form-input" />
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Slots (local time):</div>
+            {slots.map((slot, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <input type="datetime-local" value={slot} onChange={e => handleSlotChange(i, e.target.value)} required className="form-input" style={{ flex: 1 }} />
+                <button type="button" onClick={() => removeSlot(i)} style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Remove</button>
+              </div>
+            ))}
+            <button type="button" onClick={addSlot} style={{ color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Add Slot</button>
+          </div>
+          <Button type="submit">Create Event</Button>
+        </form>
+        {message && <div style={{ color: '#34d399', marginTop: 12 }}>{message}</div>}
+      </div>
     </div>
   );
 }

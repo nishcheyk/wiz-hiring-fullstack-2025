@@ -3,14 +3,19 @@ import { openDb } from '../database.js';
 
 const router = express.Router();
 
-// Create Event
+// Create Event (only for approved users)
 router.post('/', async (req, res) => {
-  const { title, description, slots, maxBookingsPerSlot } = req.body;
-  if (!title || !Array.isArray(slots) || !maxBookingsPerSlot) {
+  const { title, description, slots, maxBookingsPerSlot, userId } = req.body;
+  if (!title || !Array.isArray(slots) || !maxBookingsPerSlot || !userId) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   try {
     const db = await openDb();
+    // Check if user is approved
+    const user = await db.get('SELECT * FROM users WHERE email = ? AND is_approved = 1', [userId]);
+    if (!user) {
+      return res.status(403).json({ error: 'User not approved to create events' });
+    }
     const result = await db.run(
       'INSERT INTO events (title, description, max_bookings_per_slot) VALUES (?, ?, ?)',
       [title, description, maxBookingsPerSlot]
@@ -52,4 +57,4 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-export default router;
+export default router;

@@ -32,5 +32,11 @@ export async function migrate() {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(slot_id) REFERENCES slots(id)
     );
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      is_approved INTEGER DEFAULT 0,
+      is_admin INTEGER DEFAULT 0
+    );
   `);
 }
