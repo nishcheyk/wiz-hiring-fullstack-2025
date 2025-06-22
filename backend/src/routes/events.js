@@ -19,18 +19,19 @@ router.post('/', async (req, res) => {
       }
     }
     // Check if user is approved
-    const user = await db.get('SELECT * FROM users WHERE email = ? AND is_approved = 1', [userId]);
+    const userResult = await db.query('SELECT * FROM users WHERE email = $1 AND is_approved = 1', [userId]);
+    const user = userResult.rows[0];
     if (!user) {
       return res.status(403).json({ error: 'User not approved to create events' });
     }
-    const result = await db.run(
-      'INSERT INTO events (title, description, max_bookings_per_slot) VALUES (?, ?, ?)',
+    const eventResult = await db.query(
+      'INSERT INTO events (title, description, max_bookings_per_slot) VALUES ($1, $2, $3) RETURNING id',
       [title, description, maxBookingsPerSlot]
     );
-    const eventId = result.lastID;
+    const eventId = eventResult.rows[0].id;
     for (const slot of slots) {
-      await db.run(
-        'INSERT INTO slots (event_id, start_time) VALUES (?, ?)',
+      await db.query(
+        'INSERT INTO slots (event_id, start_time) VALUES ($1, $2)',
         [eventId, slot]
       );
     }
@@ -44,8 +45,8 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const db = await openDb();
-    const events = await db.all('SELECT * FROM events');
-    res.json(events);
+    const result = await db.query('SELECT * FROM events');
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events' });
   }
@@ -55,9 +56,11 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const db = await openDb();
-    const event = await db.get('SELECT * FROM events WHERE id = ?', [req.params.id]);
+    const eventResult = await db.query('SELECT * FROM events WHERE id = $1', [req.params.id]);
+    const event = eventResult.rows[0];
     if (!event) return res.status(404).json({ error: 'Event not found' });
-    const slots = await db.all('SELECT * FROM slots WHERE event_id = ?', [req.params.id]);
+    const slotsResult = await db.query('SELECT * FROM slots WHERE event_id = $1', [req.params.id]);
+    const slots = slotsResult.rows;
     res.json({ ...event, slots });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch event' });

@@ -13,11 +13,12 @@ router.post('/approve', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const user = await db.get('SELECT * FROM users WHERE email = ?', [userEmail]);
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [userEmail]);
+    const user = result.rows[0];
     if (!user) {
-      await db.run('INSERT INTO users (email, is_approved) VALUES (?, 1)', [userEmail]);
+      await db.query('INSERT INTO users (email, is_approved) VALUES ($1, 1)', [userEmail]);
     } else {
-      await db.run('UPDATE users SET is_approved = 1 WHERE email = ?', [userEmail]);
+      await db.query('UPDATE users SET is_approved = 1 WHERE email = $1', [userEmail]);
     }
     res.json({ success: true, message: 'User approved.' });
   } catch (err) {
@@ -33,7 +34,8 @@ router.get('/', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const users = await db.all('SELECT * FROM users');
+    const result = await db.query('SELECT * FROM users');
+    const users = result.rows;
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users.' });
@@ -48,11 +50,12 @@ router.post('/signup', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const existing = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const existing = result.rows[0];
     if (existing) {
       return res.status(409).json({ error: 'Email already exists.' });
     }
-    await db.run('INSERT INTO users (email, is_approved) VALUES (?, 0)', [email]);
+    await db.query('INSERT INTO users (email, is_approved) VALUES ($1, 0)', [email]);
     res.status(201).json({ success: true, message: 'Signup successful. Await admin approval to add events.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to sign up.' });
@@ -67,7 +70,8 @@ router.get('/me', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const user = await db.get('SELECT * FROM users WHERE email = ?', [userEmail]);
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [userEmail]);
+    const user = result.rows[0];
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }

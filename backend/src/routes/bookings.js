@@ -14,20 +14,24 @@ router.post('/:id/bookings', async (req, res) => {
   try {
     const db = await openDb();
     // Check if slot exists
-    const slot = await db.get('SELECT * FROM slots WHERE id = ? AND event_id = ?', [slotId, req.params.id]);
+    const slotResult = await db.query('SELECT * FROM slots WHERE id = $1 AND event_id = $2', [slotId, req.params.id]);
+    const slot = slotResult.rows[0];
     if (!slot) return res.status(404).json({ error: 'Sorry, this slot does not exist.' });
     // Prevent double booking for same user + slot
-    const existing = await db.get('SELECT * FROM bookings WHERE slot_id = ? AND email = ?', [slotId, email]);
+    const existingResult = await db.query('SELECT * FROM bookings WHERE slot_id = $1 AND email = $2', [slotId, email]);
+    const existing = existingResult.rows[0];
     if (existing) return res.status(409).json({ error: 'You have already booked this slot.' });
     // Check max bookings per slot
-    const event = await db.get('SELECT * FROM events WHERE id = ?', [req.params.id]);
-    const count = await db.get('SELECT COUNT(*) as cnt FROM bookings WHERE slot_id = ?', [slotId]);
-    if (count.cnt >= event.max_bookings_per_slot) {
+    const eventResult = await db.query('SELECT * FROM events WHERE id = $1', [req.params.id]);
+    const event = eventResult.rows[0];
+    const countResult = await db.query('SELECT COUNT(*) as cnt FROM bookings WHERE slot_id = $1', [slotId]);
+    const count = parseInt(countResult.rows[0].cnt, 10);
+    if (count >= event.max_bookings_per_slot) {
       return res.status(409).json({ error: 'Sorry, this slot is already full.' });
     }
     // Add booking
-    const result = await db.run('INSERT INTO bookings (slot_id, name, email) VALUES (?, ?, ?)', [slotId, name, email]);
-    res.status(201).json({ success: true, message: 'Your booking was successful!', bookingId: result.lastID });
+    const result = await db.query('INSERT INTO bookings (slot_id, name, email) VALUES ($1, $2, $3) RETURNING id', [slotId, name, email]);
+    res.status(201).json({ success: true, message: 'Your booking was successful!', bookingId: result.rows[0].id });
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong while booking your slot. Please try again.' });
   }
@@ -37,9 +41,10 @@ router.post('/:id/bookings', async (req, res) => {
 router.delete('/bookings/:bookingId', async (req, res) => {
   try {
     const db = await openDb();
-    const booking = await db.get('SELECT * FROM bookings WHERE id = ?', [req.params.bookingId]);
+    const bookingResult = await db.query('SELECT * FROM bookings WHERE id = $1', [req.params.bookingId]);
+    const booking = bookingResult.rows[0];
     if (!booking) return res.status(404).json({ error: 'Booking not found.' });
-    await db.run('DELETE FROM bookings WHERE id = ?', [req.params.bookingId]);
+    await db.query('DELETE FROM bookings WHERE id = $1', [req.params.bookingId]);
     res.json({ success: true, message: 'Your booking has been cancelled.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to cancel booking.' });
@@ -50,15 +55,15 @@ router.delete('/bookings/:bookingId', async (req, res) => {
 router.get('/users/:email/bookings', async (req, res) => {
   try {
     const db = await openDb();
-    const bookings = await db.all(
+    const bookingsResult = await db.query(
       `SELECT b.*, s.start_time, e.title FROM bookings b
        JOIN slots s ON b.slot_id = s.id
        JOIN events e ON s.event_id = e.id
-       WHERE b.email = ?
+       WHERE b.email = $1
        ORDER BY b.created_at DESC`,
       [req.params.email]
     );
-    res.json(bookings);
+    res.json(bookingsResult.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch bookings. Please try again later.' });
   }
@@ -68,15 +73,15 @@ router.get('/users/:email/bookings', async (req, res) => {
 router.get('/events/:id/bookings', async (req, res) => {
   try {
     const db = await openDb();
-    const bookings = await db.all(
+    const bookingsResult = await db.query(
       `SELECT b.*, s.start_time, e.title FROM bookings b
        JOIN slots s ON b.slot_id = s.id
        JOIN events e ON s.event_id = e.id
-       WHERE e.id = ?
+       WHERE e.id = $1
        ORDER BY b.created_at DESC`,
       [req.params.id]
     );
-    res.json(bookings);
+    res.json(bookingsResult.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch event bookings.' });
   }
@@ -86,13 +91,14 @@ router.get('/events/:id/bookings', async (req, res) => {
 router.get('/bookings/:bookingId', async (req, res) => {
   try {
     const db = await openDb();
-    const booking = await db.get(
+    const bookingResult = await db.query(
       `SELECT b.*, s.start_time, e.title FROM bookings b
        JOIN slots s ON b.slot_id = s.id
        JOIN events e ON s.event_id = e.id
-       WHERE b.id = ?`,
+       WHERE b.id = $1`,
       [req.params.bookingId]
     );
+    const booking = bookingResult.rows[0];
     if (!booking) return res.status(404).json({ error: 'Booking not found.' });
     res.json(booking);
   } catch (err) {
@@ -108,13 +114,13 @@ router.get('/admin/bookings', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const bookings = await db.all(
+    const bookingsResult = await db.query(
       `SELECT b.*, s.start_time, e.title FROM bookings b
        JOIN slots s ON b.slot_id = s.id
        JOIN events e ON s.event_id = e.id
        ORDER BY b.created_at DESC`
     );
-    res.json(bookings);
+    res.json(bookingsResult.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch all bookings.' });
   }
