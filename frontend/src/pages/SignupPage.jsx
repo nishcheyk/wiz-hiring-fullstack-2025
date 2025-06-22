@@ -29,8 +29,22 @@ function SignupPage() {
       <div className="form-container">
         <h1 className="title mb-4">Sign Up</h1>
         <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            className="input-polished"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            className="input-polished"
+          />
           <Button type="submit">Sign Up</Button>
         </form>
         <div style={{ marginTop: 16, textAlign: 'center' }}>

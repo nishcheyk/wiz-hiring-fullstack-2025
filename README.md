@@ -5,11 +5,33 @@ BookWIZ is a fullstack event booking platform built with React (frontend), Expre
 
 ---
 
+## ✨ Key Features
+- Event listing, details, and slot booking
+- **Admin drag-and-drop event reordering** (see below)
+- Event branding (image URL)
+- Google Calendar sync (mocked link)
+- My Bookings page
+- Admin user approval
+
+---
+
+## 🚀 Drag-and-Drop Event Reordering (Admin)
+**Admins can reorder events on the Home page using a modern drag-and-drop interface.**
+
+- Go to `/admin/events` after logging in as admin.
+- Drag events up or down to change their order.
+- The new order is saved instantly and reflected for all users.
+- Powered by [`@hello-pangea/dnd`](https://github.com/hello-pangea/dnd) for React 19 compatibility.
+
+![Admin Drag-and-Drop Demo](docs/drag-drop-demo.gif)
+
+---
+
 ## Tech Stack
 - **Frontend:** React, Vite, Tailwind CSS
 - **Backend:** Node.js, Express
 - **Database:** PostgreSQL
-- **Deployment:** Render (backend) (frontend)
+- **Deployment:** Render (backend), Vercel/Netlify (frontend)
 
 ---
 
@@ -30,16 +52,6 @@ BookWIZ/
     .env.example
     ...
 ```
-
----
-
-## Features
-- Event listing, details, and slot booking
-- Admin drag-and-drop event reordering
-- Event branding (image URL)
-- Google Calendar sync (mocked link)
-- My Bookings page
-- Admin user approval
 
 ---
 

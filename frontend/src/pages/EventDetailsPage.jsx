@@ -4,6 +4,7 @@ import axios from 'axios';
 import { DateTime } from 'luxon';
 import Button from '../components/Button';
 import CheckoutForm from '../components/CheckoutForm';
+import houseFull from '../assets/house-full.svg';
 
 function EventDetailsPage() {
   const { id } = useParams();
@@ -65,6 +66,7 @@ function EventDetailsPage() {
   };
 
   const userEmail = localStorage.getItem('userEmail');
+  const allSlotsFull = slots.length > 0 && slots.every(slot => slot.available_spots === 0);
 
   return (
     <div className="main-content animate-fade-in">
@@ -77,11 +79,16 @@ function EventDetailsPage() {
             <h1 className="title mb-2" style={{ textAlign: 'left', fontSize: '1.7rem', marginBottom: 12 }}>{event.title}</h1>
             <p style={{ marginBottom: 18 }}>{event.description}</p>
             <h2 style={{ fontWeight: 600, marginBottom: 8 }}>Available Slots</h2>
-            {!showCheckout ? (
+            {allSlotsFull ? (
+              <div style={{ textAlign: 'center', margin: '32px 0' }}>
+                <img src={houseFull} alt="House Full" style={{ width: 80, marginBottom: 12 }} />
+                <div style={{ color: '#a78bfa', fontWeight: 600, fontSize: 20 }}>All slots are booked (House Full)</div>
+              </div>
+            ) : !showCheckout ? (
               <form onSubmit={handleStartBooking} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
                 <select value={slotId} onChange={e => setSlotId(e.target.value)} required style={{ padding: 10, borderRadius: 6, border: '1px solid #444', background: '#18181b', color: '#fff' }}>
                   <option value="">Select a slot</option>
-                  {slots.map(slot => (
+                  {slots.filter(slot => slot.available_spots > 0).map(slot => (
                     <option key={slot.id} value={slot.id}>
                       {DateTime.fromISO(slot.start_time, { zone: 'utc' }).toLocal().toFormat('ff')}
                     </option>

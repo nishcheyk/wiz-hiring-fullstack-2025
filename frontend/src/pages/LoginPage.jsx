@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import axios from 'axios';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -8,34 +9,35 @@ function LoginPage() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Use the real admin email from frontend .env
     const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@gmail.com';
     const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin';
-    
+
     if (email === adminEmail && password === adminPassword) {
       localStorage.setItem('userType', 'admin');
       localStorage.setItem('userEmail', email);
-      localStorage.setItem('userId', email); // Save userId as email for admin
-      console.log('localStorage after admin login:', {
-        userType: localStorage.getItem('userType'),
-        userEmail: localStorage.getItem('userEmail'),
-        userId: localStorage.getItem('userId')
-      });
+      localStorage.setItem('userId', email);
       navigate('/admin/users');
-    } else if (email && password) {
+      return;
+    }
+
+    // Check user existence only (approval not required)
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
+        headers: { Authorization: email }
+      });
+      const user = res.data;
+      if (!user) {
+        setError('User not found.');
+        return;
+      }
       localStorage.setItem('userType', 'user');
       localStorage.setItem('userEmail', email);
-      localStorage.setItem('userId', email); // Save userId as email for user
-      console.log('localStorage after user login:', {
-        userType: localStorage.getItem('userType'),
-        userEmail: localStorage.getItem('userEmail'),
-        userId: localStorage.getItem('userId')
-      });
+      localStorage.setItem('userId', email);
       navigate('/');
-    } else {
-      setError('Invalid credentials');
+    } catch (err) {
+      setError('User not found.');
     }
   };
 

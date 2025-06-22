@@ -26,6 +26,21 @@ router.post('/approve', async (req, res) => {
   }
 });
 
+// Admin: Revoke a user (set is_approved=0)
+router.post('/revoke', async (req, res) => {
+  const { adminEmail, userEmail } = req.body;
+  if (adminEmail !== process.env.ADMIN_EMAIL) {
+    return res.status(403).json({ error: 'Unauthorized: Admin access only.' });
+  }
+  try {
+    const db = await openDb();
+    await db.query('UPDATE users SET is_approved = 0 WHERE email = $1', [userEmail]);
+    res.json({ success: true, message: 'User revoked.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to revoke user.' });
+  }
+});
+
 // Get all users (admin only)
 router.get('/', async (req, res) => {
   const { adminEmail } = req.query;

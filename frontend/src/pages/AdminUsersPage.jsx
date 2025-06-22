@@ -40,17 +40,19 @@ function AdminUsersPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+  const revokeUser = async (userEmail) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/users/revoke`, { adminEmail, userEmail });
+      setMessage(`Revoked ${userEmail}`);
+      fetchUsers();
+    } catch (err) {
+      setMessage('Failed to revoke user');
+    }
   };
 
   return (
     <div className="form-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="title mb-4">User Approvals</h1>
-        <Button type="button" onClick={handleLogout} style={{ marginLeft: 16 }}>Logout</Button>
-      </div>
+      <h1 className="title mb-4">User Approvals</h1>
       <div style={{ marginBottom: 16 }}>
         <input
           type="email"
@@ -65,7 +67,22 @@ function AdminUsersPage() {
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {users.map(u => (
           <li key={u.email} style={{ marginBottom: 8, background: '#23272f', borderRadius: 6, padding: 8 }}>
-            {u.email} {u.is_approved ? <span style={{ color: '#34d399' }}>(Approved)</span> : <Button type="button" onClick={() => approveUser(u.email)} size="sm">Approve</Button>}
+            {u.email} {u.is_approved ? (
+              <>
+                <span style={{ color: '#34d399' }}>(Approved)</span>
+                <Button
+                  type="button"
+                  onClick={() => revokeUser(u.email)}
+                  size="sm"
+                  className="revoke-btn"
+                  style={{ marginLeft: 12 }}
+                >
+                  Revoke
+                </Button>
+              </>
+            ) : (
+              <Button type="button" onClick={() => approveUser(u.email)} size="sm">Approve</Button>
+            )}
           </li>
         ))}
       </ul>

@@ -65,4 +65,25 @@ router.get('/users/:email/bookings', async (req, res) => {
   }
 });
 
+// Admin: Get all bookings
+router.get('/admin/bookings', async (req, res) => {
+  const { admin } = req.query;
+  if (admin !== process.env.ADMIN_EMAIL) {
+    return res.status(403).json({ error: 'Unauthorized: Admin access only.' });
+  }
+  try {
+    const db = await openDb();
+    const result = await db.query(
+      `SELECT b.*, s.start_time, e.title
+       FROM bookings b
+       JOIN slots s ON b.slot_id = s.id
+       JOIN events e ON s.event_id = e.id
+       ORDER BY s.start_time ASC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch bookings.' });
+  }
+});
+
 export default router;
