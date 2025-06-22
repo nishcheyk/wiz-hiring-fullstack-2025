@@ -13,6 +13,7 @@ function EventDetailsPage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [calendarUrl, setCalendarUrl] = useState('');
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/events/${id}`)
@@ -42,6 +43,20 @@ function EventDetailsPage() {
       setMessage('Booking successful! Check your email for confirmation.');
       setShowCheckout(false);
       setSlotId('');
+      // Generate Google Calendar link (mocked)
+      const slot = slots.find(s => s.id === slotId);
+      if (slot) {
+        const start = DateTime.fromISO(slot.start_time, { zone: 'utc' }).toLocal();
+        const end = start.plus({ hours: 1 });
+        const details = {
+          text: event.title,
+          dates: `${start.toFormat('yyyyMMdd\'T'HHmmss)}/${end.toFormat('yyyyMMdd\'T'HHmmss)}`,
+          details: event.description || '',
+          location: '',
+        };
+        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(details.text)}&dates=${details.dates}&details=${encodeURIComponent(details.details)}`;
+        setCalendarUrl(url);
+      }
     } catch (err) {
       setMessage(err.response?.data?.error || 'Booking failed');
     } finally {
@@ -56,6 +71,9 @@ function EventDetailsPage() {
       <div className="form-container">
         {event && (
           <>
+            {event.image_url && (
+              <img src={event.image_url} alt={event.title} style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }} />
+            )}
             <h1 className="title mb-2" style={{ textAlign: 'left', fontSize: '1.7rem', marginBottom: 12 }}>{event.title}</h1>
             <p style={{ marginBottom: 18 }}>{event.description}</p>
             <h2 style={{ fontWeight: 600, marginBottom: 8 }}>Available Slots</h2>
@@ -79,6 +97,11 @@ function EventDetailsPage() {
             )}
             {loading && <div style={{ color: '#a78bfa', marginTop: 12 }}>Processing...</div>}
             {message && <div style={{ color: '#a78bfa', marginTop: 12 }}>{message}</div>}
+            {calendarUrl && (
+              <a href={calendarUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', marginTop: 12, display: 'inline-block' }}>
+                ➕ Add to Google Calendar
+              </a>
+            )}
           </>
         )}
       </div>

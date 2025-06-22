@@ -10,6 +10,7 @@ function CreateEventPage() {
   const [slots, setSlots] = useState(['']);
   const [maxBookingsPerSlot, setMaxBookingsPerSlot] = useState(1);
   const [message, setMessage] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,7 +62,8 @@ function CreateEventPage() {
         description,
         slots: slots.map(s => DateTime.fromISO(s).toUTC().toISO()),
         maxBookingsPerSlot,
-        userId // userId is now used everywhere instead of userEmail
+        userId, // userId is now used everywhere instead of userEmail
+        imageUrl: imageUrl.trim() || undefined
       });
       setMessage('Event created!');
     } catch (err) {
@@ -87,6 +89,7 @@ function CreateEventPage() {
             ))}
             <button type="button" onClick={addSlot} style={{ color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Add Slot</button>
           </div>
+          <input type="text" placeholder="Image URL (optional)" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="form-input" />
           <Button type="submit">Create Event</Button>
         </form>
         {message && <div style={{ color: '#34d399', marginTop: 12 }}>{message}</div>}

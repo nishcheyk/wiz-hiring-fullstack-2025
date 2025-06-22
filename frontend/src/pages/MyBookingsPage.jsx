@@ -31,8 +31,8 @@ function MyBookingsPage() {
             {bookings.map(b => (
               <li key={b.id} style={{ border: '1px solid #444', padding: 16, marginBottom: 12, borderRadius: 8, background: '#18181b', color: '#fff' }}>
                 <div><b>Event:</b> {b.title}</div>
-                <div><b>Slot:</b> {b.start_time}</div>
-                <div><b>Booked at:</b> {b.created_at}</div>
+                <div><b>Slot:</b> {b.start_time ? new Date(b.start_time).toLocaleString() : ''}</div>
+                <div><b>Booked at:</b> {b.created_at ? new Date(b.created_at).toLocaleString() : ''}</div>
               </li>
             ))}
           </ul>

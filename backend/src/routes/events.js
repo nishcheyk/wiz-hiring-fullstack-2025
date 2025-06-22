@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Create Event (only for approved users)
 router.post('/', async (req, res) => {
-  const { title, description, slots, maxBookingsPerSlot, userId } = req.body;
+  const { title, description, slots, maxBookingsPerSlot, userId, imageUrl } = req.body;
   if (!title || !Array.isArray(slots) || !maxBookingsPerSlot || !userId) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -25,8 +25,8 @@ router.post('/', async (req, res) => {
       return res.status(403).json({ error: 'User not approved to create events' });
     }
     const eventResult = await db.query(
-      'INSERT INTO events (title, description, max_bookings_per_slot) VALUES ($1, $2, $3) RETURNING id',
-      [title, description, maxBookingsPerSlot]
+      'INSERT INTO events (title, description, max_bookings_per_slot, image_url) VALUES ($1, $2, $3, $4) RETURNING id',
+      [title, description, maxBookingsPerSlot, imageUrl || null]
     );
     const eventId = eventResult.rows[0].id;
     for (const slot of slots) {

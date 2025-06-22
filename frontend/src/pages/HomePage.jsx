@@ -48,6 +48,9 @@ function HomePage() {
                 onMouseOver={e => e.currentTarget.style.transform = 'scale(1.02)'}
                 onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
               >
+                {event.image_url && (
+                  <img src={event.image_url} alt={event.title} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
+                )}
                 <Link to={`/events/${event.id}`} style={{ fontWeight: 600, color: '#a78bfa', textDecoration: 'none', fontSize: '1.2rem' }}>
                   {event.title}
                 </Link>

@@ -1,6 +1,7 @@
 import express from 'express';
 import { openDb } from '../database.js';
 import dotenv from 'dotenv';
+import { sendBookingConfirmation } from '../mail.js';
 dotenv.config();
 
 const router = express.Router();
@@ -31,6 +32,17 @@ router.post('/:id/bookings', async (req, res) => {
     }
     // Add booking
     const result = await db.query('INSERT INTO bookings (slot_id, name, email) VALUES ($1, $2, $3) RETURNING id', [slotId, name, email]);
+    // Send confirmation email
+    try {
+      await sendBookingConfirmation({
+        to: email,
+        eventTitle: event.title,
+        slotTime: slot.start_time
+      });
+    } catch (e) {
+      // Log but don't fail booking if email fails
+      console.error('Email send error:', e);
+    }
     res.status(201).json({ success: true, message: 'Your booking was successful!', bookingId: result.rows[0].id });
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong while booking your slot. Please try again.' });

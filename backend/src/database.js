@@ -22,7 +22,8 @@ export async function migrate() {
         title TEXT NOT NULL,
         description TEXT,
         max_bookings_per_slot INTEGER NOT NULL,
-        position INTEGER DEFAULT 0
+        position INTEGER DEFAULT 0,
+        image_url TEXT
       );
       CREATE TABLE IF NOT EXISTS slots (
         id SERIAL PRIMARY KEY,
