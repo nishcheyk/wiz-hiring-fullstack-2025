@@ -46,8 +46,9 @@ function Navbar() {
         {/* Only admin sees admin links */}
         {userType === 'admin' && (
           <>
-            <li><Link to="/admin/users" className={location.pathname === '/admin/users' ? 'active' : ''}>Admin</Link></li>
-            <li><Link to="/admin/bookings" className={location.pathname === '/admin/bookings' ? 'active' : ''}>Bookings</Link></li>
+            <li><Link to="/admin/users" className={location.pathname === '/admin/users' ? 'active' : ''}>Manage Users</Link></li>
+            <li><Link to="/admin/bookings" className={location.pathname === '/admin/bookings' ? 'active' : ''}>All Bookings</Link></li>
+            <li><Link to="/admin/events" className={location.pathname === '/admin/events' ? 'active' : ''}>Reorder Events</Link></li>
           </>
         )}
         {userType && (

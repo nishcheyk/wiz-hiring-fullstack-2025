@@ -11,6 +11,7 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import LoginPage from './pages/LoginPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import SignupPage from './pages/SignupPage';
+import AdminEventsPage from './pages/AdminEventsPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+          <Route path="/admin/events" element={<AdminEventsPage />} />
         </Routes>
       </Layout>
     </Router>

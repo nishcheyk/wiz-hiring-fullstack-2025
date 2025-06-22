@@ -41,14 +41,34 @@ router.post('/', async (req, res) => {
   }
 });
 
-// List Events
+// List Events (ordered by position)
 router.get('/', async (req, res) => {
   try {
     const db = await openDb();
-    const result = await db.query('SELECT * FROM events');
+    const result = await db.query('SELECT * FROM events ORDER BY position ASC, id ASC');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch events' });
+  }
+});
+
+// Update event positions (admin only)
+router.post('/reorder', async (req, res) => {
+  const { adminEmail, order } = req.body;
+  if (adminEmail !== process.env.ADMIN_EMAIL) {
+    return res.status(403).json({ error: 'Unauthorized: Admin access only.' });
+  }
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ error: 'Order must be an array of event IDs.' });
+  }
+  try {
+    const db = await openDb();
+    for (let i = 0; i < order.length; i++) {
+      await db.query('UPDATE events SET position = $1 WHERE id = $2', [i, order[i]]);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reorder events.' });
   }
 });
 

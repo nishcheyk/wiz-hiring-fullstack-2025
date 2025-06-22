@@ -36,7 +36,7 @@ function EventDetailsPage() {
     setLoading(true);
     setMessage('');
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/events/${id}/bookings`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/${id}/bookings`, {
         name, email, slotId
       });
       setMessage('Booking successful! Check your email for confirmation.');
