@@ -31,7 +31,7 @@ function Navbar() {
   return (
     <nav className="navbar slide-up">
       <div className="navbar-logo">
-        <Link to="/" className="navbar-title">BookMySlot</Link>
+        <Link to="/" className="navbar-title">BookWIZ</Link>
       </div>
       <ul className="navbar-links">
         <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Events</Link></li>
@@ -54,12 +54,9 @@ function Navbar() {
         {userType && (
           <li><button onClick={handleLogout} className="logout-btn">Logout</button></li>
         )}
-        {/* Only show login or signup, never both */}
-        {!userType && location.pathname !== '/signup' && (
+        {/* Only show login in guest mode */}
+        {!userType && (
           <li><Link to="/login" className={location.pathname === '/login' ? 'active' : ''}>Login</Link></li>
-        )}
-        {!userType && location.pathname !== '/login' && (
-          <li><Link to="/signup" className={location.pathname === '/signup' ? 'active' : ''}>Sign Up</Link></li>
         )}
       </ul>
     </nav>

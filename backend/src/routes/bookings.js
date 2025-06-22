@@ -13,6 +13,9 @@ router.post('/:id/bookings', async (req, res) => {
     const slotResult = await db.query('SELECT * FROM slots WHERE id = $1 AND event_id = $2', [slotId, req.params.id]);
     const slot = slotResult.rows[0];
     if (!slot) return res.status(404).json({ error: 'Sorry, this slot does not exist.' });
+    if (slot.available_spots !== null && slot.available_spots <= 0) {
+      return res.status(409).json({ error: 'Sorry, this slot is already full.' });
+    }
     const existingResult = await db.query('SELECT * FROM bookings WHERE slot_id = $1 AND email = $2', [slotId, email]);
     const existing = existingResult.rows[0];
     if (existing) return res.status(409).json({ error: 'You have already booked this slot.' });
@@ -23,6 +26,8 @@ router.post('/:id/bookings', async (req, res) => {
     if (count >= event.max_bookings_per_slot) {
       return res.status(409).json({ error: 'Sorry, this slot is already full.' });
     }
+    // Decrement available_spots
+    await db.query('UPDATE slots SET available_spots = available_spots - 1 WHERE id = $1', [slotId]);
     const result = await db.query('INSERT INTO bookings (slot_id, name, email) VALUES ($1, $2, $3) RETURNING id', [slotId, name, email]);
     res.status(201).json({ success: true, message: 'Your booking was successful!', bookingId: result.rows[0].id });
   } catch (err) {

@@ -10,30 +10,25 @@ router.post('/', async (req, res) => {
   }
   try {
     const db = await openDb();
-    const now = new Date();
-    for (const slot of slots) {
-      if (new Date(slot) < now) {
-        return res.status(400).json({ error: 'Cannot create events with past slots.' });
-      }
-    }
     const userResult = await db.query('SELECT * FROM users WHERE email = $1 AND is_approved = 1', [userId]);
     const user = userResult.rows[0];
     if (!user) {
       return res.status(403).json({ error: 'User not approved to create events' });
     }
     const eventResult = await db.query(
-      'INSERT INTO events (title, description, max_bookings_per_slot, image_url) VALUES ($1, $2, $3, $4) RETURNING id',
-      [title, description, maxBookingsPerSlot, imageUrl || null]
+      'INSERT INTO events (title, description, max_bookings_per_slot, image_url, date) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [title, description, maxBookingsPerSlot, imageUrl || null, slots[0]]
     );
     const eventId = eventResult.rows[0].id;
     for (const slot of slots) {
       await db.query(
-        'INSERT INTO slots (event_id, start_time) VALUES ($1, $2)',
-        [eventId, slot]
+        'INSERT INTO slots (event_id, start_time, available_spots) VALUES ($1, $2, $3)',
+        [eventId, slot, maxBookingsPerSlot]
       );
     }
     res.status(201).json({ id: eventId });
   } catch (err) {
+    console.error('Error in POST /events:', err); // Log the real error
     res.status(500).json({ error: 'Failed to create event' });
   }
 });

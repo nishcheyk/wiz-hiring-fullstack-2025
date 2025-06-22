@@ -75,21 +75,33 @@ function CreateEventPage() {
     <div className="main-content animate-fade-in">
       <div className="form-container">
         <h1 className="title mb-4" style={{ textAlign: 'left' }}>Create Event</h1>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required className="form-input" />
-          <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="form-input" style={{ minHeight: 60 }} />
-          <input type="number" min="1" placeholder="Max bookings per slot" value={maxBookingsPerSlot} onChange={e => setMaxBookingsPerSlot(Number(e.target.value))} required className="form-input" />
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>Slots (local time):</div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="input-group">
+            <label htmlFor="event-title">Title</label>
+            <input id="event-title" type="text" placeholder="Event Title" value={title} onChange={e => setTitle(e.target.value)} required style={{ borderRadius: 8 }} />
+          </div>
+          <div className="input-group">
+            <label htmlFor="event-description">Description</label>
+            <textarea id="event-description" placeholder="Event Description" value={description} onChange={e => setDescription(e.target.value)} style={{ minHeight: 60, borderRadius: 8 }} />
+          </div>
+          <div className="input-group">
+            <label htmlFor="max-bookings">Max bookings per slot</label>
+            <input id="max-bookings" type="number" min="1" placeholder="Max bookings per slot" value={maxBookingsPerSlot} onChange={e => setMaxBookingsPerSlot(Number(e.target.value))} required style={{ borderRadius: 8 }} />
+          </div>
+          <div className="input-group" style={{ marginBottom: 8 }}>
+            <label>Slots (local time):</label>
             {slots.map((slot, i) => (
               <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                <input type="datetime-local" value={slot} onChange={e => handleSlotChange(i, e.target.value)} required className="form-input" style={{ flex: 1 }} />
+                <input type="datetime-local" value={slot} onChange={e => handleSlotChange(i, e.target.value)} required style={{ flex: 1, borderRadius: 8 }} />
                 <button type="button" onClick={() => removeSlot(i)} style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Remove</button>
               </div>
             ))}
             <button type="button" onClick={addSlot} style={{ color: '#a78bfa', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Add Slot</button>
           </div>
-          <input type="text" placeholder="Image URL (optional)" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="form-input" />
+          <div className="input-group">
+            <label htmlFor="image-url">Image URL (optional)</label>
+            <input id="image-url" type="text" placeholder="Image URL (optional)" value={imageUrl} onChange={e => setImageUrl(e.target.value)} style={{ borderRadius: 8 }} />
+          </div>
           <Button type="submit">Create Event</Button>
         </form>
         {message && <div style={{ color: '#34d399', marginTop: 12 }}>{message}</div>}

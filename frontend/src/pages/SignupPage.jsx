@@ -33,6 +33,10 @@ function SignupPage() {
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
           <Button type="submit">Sign Up</Button>
         </form>
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          Already have an account?{' '}
+          <Button type="button" variant="link" onClick={() => navigate('/login')} style={{ color: '#a78bfa', background: 'none', border: 'none', padding: 0, fontWeight: 500 }}>Login</Button>
+        </div>
         {message && <div style={{ color: '#34d399', marginTop: 8 }}>{message}</div>}
       </div>
     </div>

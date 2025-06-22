@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="12" fill="#a78bfa"/>
+  <path d="M16 48V28L32 16L48 28V48H16Z" fill="#fff" stroke="#23272f" stroke-width="2"/>
+  <rect x="24" y="36" width="16" height="12" rx="2" fill="#a78bfa" stroke="#23272f" stroke-width="2"/>
+  <text x="32" y="54" text-anchor="middle" fill="#23272f" font-size="12" font-family="Arial" font-weight="bold">FULL</text>
+</svg>
