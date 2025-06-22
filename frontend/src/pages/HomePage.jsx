@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Button from '../components/Button';
 import noEvents from '../assets/no-events.svg';
+import EventSlider from '../components/EventSlider';
+import '../components/EventSlider.css'; // Assuming you have a CSS file for the slider
 
 function HomePage() {
   const [events, setEvents] = useState([]);
@@ -29,6 +31,7 @@ function HomePage() {
 
   return (
     <div className="main-content animate-fade-in">
+      <EventSlider />
       <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
         <h1 className="title mb-4" style={{ textAlign: 'left', fontSize: '2rem', marginBottom: 24 }}>Upcoming Events</h1>
         {approved && (
@@ -43,20 +46,53 @@ function HomePage() {
           </div>
         ) : (
           <ul style={{ marginTop: 0, padding: 0, listStyle: 'none' }}>
-            {events.map(event => (
-              <li key={event.id} style={{ border: '1px solid #444', padding: 20, marginBottom: 18, borderRadius: 12, background: '#23272f', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', gap: 8 }}
-                onMouseOver={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                {event.image_url && (
-                  <img src={event.image_url} alt={event.title} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
-                )}
-                <Link to={`/events/${event.id}`} style={{ fontWeight: 600, color: '#a78bfa', textDecoration: 'none', fontSize: '1.2rem' }}>
-                  {event.title}
-                </Link>
-                <div style={{ fontSize: 15, color: '#aaa' }}>Max bookings per slot: {event.max_bookings_per_slot}</div>
-              </li>
-            ))}
+            {events.map(event => {
+              const isFull = event.available_spots === 0;
+              return (
+                <li
+                  key={event.id}
+                  style={{
+                    border: '1px solid #444',
+                    padding: 20,
+                    marginBottom: 18,
+                    borderRadius: 12,
+                    background: '#23272f',
+                    transition: 'transform 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    opacity: isFull ? 0.7 : 1,
+                    pointerEvents: isFull ? 'none' : 'auto',
+                    position: 'relative',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  {isFull && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 10,
+                      left: 10,
+                      background: '#f87171',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
+                      padding: '4px 12px',
+                      borderRadius: 6,
+                      zIndex: 2,
+                      boxShadow: '0 2px 8px 0 rgba(40,40,60,0.10)'
+                    }}>SOLD OUT</div>
+                  )}
+                  {event.image_url && (
+                    <img src={event.image_url} alt={event.title} style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
+                  )}
+                  <Link to={isFull ? '#' : `/events/${event.id}`} style={{ fontWeight: 600, color: '#a78bfa', textDecoration: 'none', fontSize: '1.2rem', pointerEvents: isFull ? 'none' : 'auto' }} tabIndex={isFull ? -1 : 0} aria-disabled={isFull}>
+                    {event.title}
+                  </Link>
+                  <div style={{ fontSize: 15, color: '#aaa' }}>Max bookings per slot: {event.max_bookings_per_slot}</div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
