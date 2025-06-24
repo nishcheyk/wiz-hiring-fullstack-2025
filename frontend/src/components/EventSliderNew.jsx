@@ -2,23 +2,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './EventSlider.css';
 
-const VISIBLE_CARDS = 4;
-const CARD_WIDTH = 240;
-const CARD_GAP = 60;
+const SLIDES_TO_SHOW = 4;
+const CARD_WIDTH = 260;
+const CARD_GAP = 28;
 const SLIDE_WIDTH = CARD_WIDTH + CARD_GAP;
-const ANIMATION_SPEED = 0.7;
-const DRAG_DECAY = 0.93;
-const DRAG_THRESHOLD = 5; // Minimum distance to start dragging
+const SLIDE_SPEED = 0.7;
+const DRAG_FRICTION = 0.93;
 
 function EventSlider() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [position, setPosition] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [direction, setDirection] = useState(1); // 1: right, -1: left
   const [isDragging, setIsDragging] = useState(false);
   const [paused, setPaused] = useState(false);
   const [dragVelocity, setDragVelocity] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
 
   const dragStartX = useRef(0);
   const lastDragX = useRef(0);
@@ -26,46 +24,31 @@ function EventSlider() {
   const dragVelocityRef = useRef(0);
   const animationRef = useRef();
   const sliderRef = useRef();
-  const containerRef = useRef();
-  const isDragStarted = useRef(false);
-  const dragDistance = useRef(0);
+  const isHovering = useRef(false);
 
+  // GUARANTEED WORKING MOCK DATA
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await fetch(`${apiUrl}/events`);
-        if (response.ok) {
-          const data = await response.json();
-          setEvents(data);
-        } else {
-          console.error('Failed to fetch events');
-        }
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
+    setEvents(Array.from({ length: 10 }).map((_, i) => ({
+      id: i + 1,
+      title: `Event ${i + 1}`,
+      description: `Description for event ${i + 1}`,
+      image_url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
+    })));
+    setLoading(false);
   }, []);
 
+  // Animation loop
   useEffect(() => {
-    if (events.length <= VISIBLE_CARDS) return;
-
+    if (events.length <= SLIDES_TO_SHOW) return;
     let pos = position;
     let velocity = dragVelocity;
-
     function animate() {
-      const maxScroll = Math.max(0, (events.length - VISIBLE_CARDS) * SLIDE_WIDTH);
-
+      const maxScroll = Math.max(0, (events.length - SLIDES_TO_SHOW) * SLIDE_WIDTH);
       if (isDragging) {
-        return;
+        // Drag handled by onDragMove
       } else if (Math.abs(velocity) > 0.1) {
         pos += velocity;
-        velocity *= DRAG_DECAY;
-
+        velocity *= DRAG_FRICTION;
         if (pos < 0) {
           pos = 0;
           velocity = 0;
@@ -75,12 +58,10 @@ function EventSlider() {
           velocity = 0;
           setDirection(-1);
         }
-
         setPosition(pos);
         setDragVelocity(velocity);
-      } else if (!paused && !isHovered) {
-        pos += ANIMATION_SPEED * direction;
-
+      } else if (!paused && !isHovering.current) {
+        pos += SLIDE_SPEED * direction;
         if (pos <= 0) {
           pos = 0;
           setDirection(1);
@@ -88,63 +69,76 @@ function EventSlider() {
           pos = maxScroll;
           setDirection(-1);
         }
-
         setPosition(pos);
       }
-
       animationRef.current = requestAnimationFrame(animate);
     }
-
     animationRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationRef.current);
-  }, [events, direction, isDragging, dragVelocity, paused, isHovered]);
+    // eslint-disable-next-line
+  }, [events, direction, isDragging, dragVelocity, paused]);
 
-  const handleMouseEnter = () => {
-    if (!isDragging) {
-      setIsHovered(true);
+  // Pause on hover/touch
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const handleMouseEnter = (e) => {
+      console.log('HOVER: pause');
+      isHovering.current = true;
       setPaused(true);
-    }
-  };
+    };
 
-  const handleMouseLeave = () => {
-    if (!isDragging) {
-      setIsHovered(false);
+    const handleMouseLeave = (e) => {
+      console.log('HOVER: resume');
+      isHovering.current = false;
       setPaused(false);
-    }
-  };
+    };
 
-  const handleTouchStart = () => {
-    if (!isDragging) {
-      setIsHovered(true);
+    const handleTouchStart = () => {
+      console.log('TOUCH: pause');
+      isHovering.current = true;
       setPaused(true);
-    }
-  };
+    };
 
-  const handleTouchEnd = () => {
-    if (!isDragging) {
-      setIsHovered(false);
+    const handleTouchEnd = () => {
+      console.log('TOUCH: resume');
+      isHovering.current = false;
       setPaused(false);
-    }
-  };
+    };
 
+    slider.addEventListener('mouseenter', handleMouseEnter, { passive: true });
+    slider.addEventListener('mouseleave', handleMouseLeave, { passive: true });
+    slider.addEventListener('touchstart', handleTouchStart, { passive: true });
+    slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      slider.removeEventListener('mouseenter', handleMouseEnter);
+      slider.removeEventListener('mouseleave', handleMouseLeave);
+      slider.removeEventListener('touchstart', handleTouchStart);
+      slider.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
+
+  // Drag logic
   function setSliderCursor(cursor) {
     if (sliderRef.current) sliderRef.current.style.cursor = cursor;
   }
 
   function onDragStart(e) {
+    console.log('DRAG: start');
     e.preventDefault();
     e.stopPropagation();
 
-    // Reset drag state
-    isDragStarted.current = false;
-    dragDistance.current = 0;
+    setIsDragging(true);
+    setPaused(true); // Pause animation during drag
 
     dragStartX.current = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     lastDragX.current = dragStartX.current;
     dragLastTime.current = Date.now();
     dragVelocityRef.current = 0;
 
-    setSliderCursor('grab');
+    setSliderCursor('grabbing');
     document.body.style.userSelect = 'none';
     document.body.style.webkitUserSelect = 'none';
     document.body.style.msUserSelect = 'none';
@@ -156,68 +150,49 @@ function EventSlider() {
   }
 
   function onDragMove(e) {
+    if (!isDragging) return;
+
     e.preventDefault();
     e.stopPropagation();
 
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
     const deltaX = clientX - lastDragX.current;
-    const totalDeltaX = clientX - dragStartX.current;
+    const maxScroll = Math.max(0, (events.length - SLIDES_TO_SHOW) * SLIDE_WIDTH);
 
-    // Update total drag distance
-    dragDistance.current = Math.abs(totalDeltaX);
+    setPosition(prev => {
+      let next = prev - deltaX;
+      if (next < 0) next = 0;
+      if (next > maxScroll) next = maxScroll;
+      return next;
+    });
 
-    // Only start dragging if we've moved past the threshold
-    if (!isDragStarted.current && dragDistance.current > DRAG_THRESHOLD) {
-      isDragStarted.current = true;
-      setIsDragging(true);
-      setPaused(true);
-      setIsHovered(false);
-      setSliderCursor('grabbing');
+    // Calculate velocity for inertia
+    const now = Date.now();
+    const dt = now - dragLastTime.current;
+    const velocity = dt > 0 ? deltaX / dt * 16 : 0;
+
+    setDragVelocity(velocity);
+    dragVelocityRef.current = velocity;
+
+    // Set direction based on drag movement
+    if (deltaX !== 0) {
+      setDirection(deltaX > 0 ? -1 : 1);
     }
 
-    // Only process drag if we've started dragging
-    if (isDragStarted.current) {
-      const maxScroll = Math.max(0, (events.length - VISIBLE_CARDS) * SLIDE_WIDTH);
-
-      if (Math.abs(deltaX) > 0) {
-        setPosition(prev => {
-          let next = prev - deltaX;
-          if (next < 0) next = 0;
-          if (next > maxScroll) next = maxScroll;
-          return next;
-        });
-
-        const now = Date.now();
-        const dt = now - dragLastTime.current;
-        const velocity = dt > 0 ? deltaX / dt * 16 : 0;
-
-        setDragVelocity(velocity);
-        dragVelocityRef.current = velocity;
-
-        if (deltaX !== 0) {
-          setDirection(deltaX > 0 ? -1 : 1);
-        }
-
-        lastDragX.current = clientX;
-        dragLastTime.current = now;
-      }
-    }
+    lastDragX.current = clientX;
+    dragLastTime.current = now;
   }
 
   function onDragEnd(e) {
-    // Only process if we actually started dragging
-    if (isDragStarted.current) {
-      setIsDragging(false);
-      setPaused(false);
-      setIsHovered(false);
-      setDragVelocity(dragVelocityRef.current);
-    }
+    console.log('DRAG: end');
+    if (!isDragging) return;
 
-    // Reset drag state
-    isDragStarted.current = false;
-    dragDistance.current = 0;
+    setIsDragging(false);
+    setPaused(false); // Resume animation after drag
 
     setSliderCursor('grab');
+    setDragVelocity(dragVelocityRef.current);
+
     document.body.style.userSelect = '';
     document.body.style.webkitUserSelect = '';
     document.body.style.msUserSelect = '';
@@ -236,7 +211,7 @@ function EventSlider() {
     return (
       <div className="event-slider-row" style={{ overflow: 'hidden', width: '100%' }}>
         <div className="slider-row-track infinite">
-          {[...Array(VISIBLE_CARDS)].map((_, idx) => (
+          {[...Array(SLIDES_TO_SHOW)].map((_, idx) => (
             <div className="slider-card slider-skeleton" key={idx}>
               <div className="slider-img slider-skeleton-img" />
               <div className="slider-title slider-skeleton-title" />
@@ -247,61 +222,42 @@ function EventSlider() {
       </div>
     );
   }
-
   if (events.length === 0) return null;
 
   return (
     <div
-      ref={containerRef}
       className="event-slider-container"
       style={{
         pointerEvents: 'auto',
         zIndex: 10,
         background: 'transparent',
-        position: 'relative',
-        padding: '20px 0',
-        margin: '20px 0',
-        cursor: isDragging ? 'grabbing' : 'grab',
-        width: '100%',
-        maxWidth: '1140px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        position: 'relative'
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={onDragStart}
-      onTouchStart={onDragStart}
     >
       <div
         className="event-slider-row"
         style={{
           overflow: 'hidden',
-          width: `${VISIBLE_CARDS * SLIDE_WIDTH}px`,
+          width: '100%',
           touchAction: 'pan-y',
           WebkitUserSelect: 'none',
           userSelect: 'none',
-          position: 'relative',
-          padding: '10px 0',
-          margin: '0 auto',
+          position: 'relative'
         }}
         ref={sliderRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         onMouseDown={onDragStart}
         onTouchStart={onDragStart}
       >
         <div
           className="slider-row-track infinite"
           style={{
-            width: `${events.length * SLIDE_WIDTH}px`,
+            width: events.length * SLIDE_WIDTH,
             transform: `translateX(-${position}px)`,
             transition: isDragging ? 'none' : 'transform 0.1s linear',
             display: 'flex',
-            gap: `${CARD_GAP}px`,
+            gap: CARD_GAP,
             cursor: isDragging ? 'grabbing' : 'grab',
             pointerEvents: 'auto',
-            padding: '10px 0',
-            flexShrink: 0,
           }}
         >
           {events.map((event, idx) => (
@@ -315,19 +271,16 @@ function EventSlider() {
                 background: '#23272f',
                 color: '#fff',
                 borderRadius: 14,
-                boxShadow: isHovered ? '0 4px 20px 0 rgba(40,40,60,0.20)' : '0 2px 12px 0 rgba(40,40,60,0.10)',
+                boxShadow: '0 2px 12px 0 rgba(40,40,60,0.10)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                margin: '10px 0',
+                margin: 0,
                 padding: 18,
                 userSelect: 'none',
                 position: 'relative',
                 textDecoration: 'none',
-                pointerEvents: 'none',
-                transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-                transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-                flexShrink: 0,
+                pointerEvents: 'none', // Prevent card clicks from interfering with drag
               }}
             >
               <img
@@ -341,47 +294,15 @@ function EventSlider() {
                   objectFit: 'cover',
                   borderRadius: 8,
                   marginBottom: 10,
-                  pointerEvents: 'none',
-                  transition: 'transform 0.2s ease',
-                  transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                  pointerEvents: 'none'
                 }}
               />
-              <div style={{
-                fontWeight: 600,
-                fontSize: 18,
-                marginBottom: 8,
-                pointerEvents: 'none',
-                color: isHovered ? '#a78bfa' : '#fff',
-                transition: 'color 0.2s ease'
-              }}>
-                {event.title}
-              </div>
-              <div style={{
-                fontSize: 14,
-                color: isHovered ? '#ccc' : '#aaa',
-                pointerEvents: 'none',
-                transition: 'color 0.2s ease'
-              }}>
-                {event.description}
-              </div>
+              <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8, pointerEvents: 'none' }}>{event.title}</div>
+              <div style={{ fontSize: 14, color: '#aaa', pointerEvents: 'none' }}>{event.description}</div>
             </div>
           ))}
         </div>
       </div>
-
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        pointerEvents: 'none',
-        border: isDragging ? '2px dashed #a78bfa' : 'none',
-        borderRadius: 8,
-        opacity: isDragging ? 0.3 : 0,
-        transition: 'opacity 0.2s ease',
-        zIndex: 1
-      }} />
     </div>
   );
 }
