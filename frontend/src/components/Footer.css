@@ -1,6 +1,6 @@
 .footer {
-  width: 100vw;
-  min-width: 100vw;
+  width: 100%;
+  min-width: 0;
   background: #18181b;
   color: #a78bfa;
   text-align: center;

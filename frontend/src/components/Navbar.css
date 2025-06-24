@@ -1,6 +1,6 @@
 .navbar {
-  width: 100vw;
-  min-width: 100vw;
+  width: 100%;
+  min-width: 0;
   background: #18181b;
   color: #f3f4f6;
   display: flex;
@@ -67,9 +67,4 @@
 }
 .slide-up {
   animation: slide-up 0.7s cubic-bezier(0.4,0,0.2,1) both;
-}
-
-.main-content {
-  min-height: 80vh;
-  padding-top: 2rem;
 }

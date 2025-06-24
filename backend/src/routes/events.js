@@ -36,7 +36,9 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const db = await openDb();
-    const result = await db.query('SELECT * FROM events ORDER BY position ASC, id ASC');
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = parseInt(req.query.offset, 10) || 0;
+    const result = await db.query('SELECT * FROM events ORDER BY position ASC, id ASC LIMIT $1 OFFSET $2', [limit, offset]);
     res.json(result.rows);
   } catch (err) {
     console.error('Error in GET /events:', err);
