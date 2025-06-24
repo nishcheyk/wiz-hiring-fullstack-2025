@@ -10,6 +10,22 @@ const ANIMATION_SPEED = 0.7;
 const DRAG_DECAY = 0.93;
 const DRAG_THRESHOLD = 5; // Minimum distance to start dragging
 
+// Responsive configuration
+const getResponsiveConfig = () => {
+  const width = window.innerWidth;
+  if (width < 640) { // Mobile
+    return { visibleCards: 1, cardWidth: 280, cardGap: 20 };
+  } else if (width < 768) { // Small tablet
+    return { visibleCards: 2, cardWidth: 240, cardGap: 30 };
+  } else if (width < 1024) { // Tablet
+    return { visibleCards: 3, cardWidth: 240, cardGap: 40 };
+  } else if (width < 1280) { // Small desktop
+    return { visibleCards: 4, cardWidth: 240, cardGap: 50 };
+  } else { // Large desktop
+    return { visibleCards: 4, cardWidth: 240, cardGap: 60 };
+  }
+};
+
 function EventSlider() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +35,7 @@ function EventSlider() {
   const [paused, setPaused] = useState(false);
   const [dragVelocity, setDragVelocity] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [responsiveConfig, setResponsiveConfig] = useState(getResponsiveConfig());
 
   const dragStartX = useRef(0);
   const lastDragX = useRef(0);
@@ -29,6 +46,20 @@ function EventSlider() {
   const containerRef = useRef();
   const isDragStarted = useRef(false);
   const dragDistance = useRef(0);
+
+  // Handle window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setResponsiveConfig(getResponsiveConfig());
+      setPosition(0); // Reset position on resize
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const { visibleCards, cardWidth, cardGap } = responsiveConfig;
+  const slideWidth = cardWidth + cardGap;
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -52,13 +83,13 @@ function EventSlider() {
   }, []);
 
   useEffect(() => {
-    if (events.length <= VISIBLE_CARDS) return;
+    if (events.length <= visibleCards) return;
 
     let pos = position;
     let velocity = dragVelocity;
 
     function animate() {
-      const maxScroll = Math.max(0, (events.length - VISIBLE_CARDS) * SLIDE_WIDTH);
+      const maxScroll = Math.max(0, (events.length - visibleCards) * slideWidth);
 
       if (isDragging) {
         return;
@@ -97,7 +128,7 @@ function EventSlider() {
 
     animationRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationRef.current);
-  }, [events, direction, isDragging, dragVelocity, paused, isHovered]);
+  }, [events, direction, isDragging, dragVelocity, paused, isHovered, visibleCards, slideWidth]);
 
   const handleMouseEnter = () => {
     if (!isDragging) {
@@ -177,7 +208,7 @@ function EventSlider() {
 
     // Only process drag if we've started dragging
     if (isDragStarted.current) {
-      const maxScroll = Math.max(0, (events.length - VISIBLE_CARDS) * SLIDE_WIDTH);
+      const maxScroll = Math.max(0, (events.length - visibleCards) * slideWidth);
 
       if (Math.abs(deltaX) > 0) {
         setPosition(prev => {
@@ -236,7 +267,7 @@ function EventSlider() {
     return (
       <div className="event-slider-row" style={{ overflow: 'hidden', width: '100%' }}>
         <div className="slider-row-track infinite">
-          {[...Array(VISIBLE_CARDS)].map((_, idx) => (
+          {[...Array(visibleCards)].map((_, idx) => (
             <div className="slider-card slider-skeleton" key={idx}>
               <div className="slider-img slider-skeleton-img" />
               <div className="slider-title slider-skeleton-title" />
@@ -260,12 +291,13 @@ function EventSlider() {
         background: 'transparent',
         position: 'relative',
         padding: '20px 0',
-        margin: '20px 0',
+        margin: '20px auto',
         cursor: isDragging ? 'grabbing' : 'grab',
         width: '100%',
         maxWidth: '1140px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -276,7 +308,7 @@ function EventSlider() {
         className="event-slider-row"
         style={{
           overflow: 'hidden',
-          width: `${VISIBLE_CARDS * SLIDE_WIDTH}px`,
+          width: `${visibleCards * slideWidth}px`,
           touchAction: 'pan-y',
           WebkitUserSelect: 'none',
           userSelect: 'none',
@@ -293,11 +325,11 @@ function EventSlider() {
         <div
           className="slider-row-track infinite"
           style={{
-            width: `${events.length * SLIDE_WIDTH}px`,
+            width: `${events.length * slideWidth}px`,
             transform: `translateX(-${position}px)`,
             transition: isDragging ? 'none' : 'transform 0.1s linear',
             display: 'flex',
-            gap: `${CARD_GAP}px`,
+            gap: `${cardGap}px`,
             cursor: isDragging ? 'grabbing' : 'grab',
             pointerEvents: 'auto',
             padding: '10px 0',
@@ -305,66 +337,72 @@ function EventSlider() {
           }}
         >
           {events.map((event, idx) => (
-            <div
+            <Link
               key={event.id}
-              className="slider-card"
-              style={{
-                width: CARD_WIDTH,
-                minWidth: CARD_WIDTH,
-                maxWidth: CARD_WIDTH,
-                background: '#23272f',
-                color: '#fff',
-                borderRadius: 14,
-                boxShadow: isHovered ? '0 4px 20px 0 rgba(40,40,60,0.20)' : '0 2px 12px 0 rgba(40,40,60,0.10)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                margin: '10px 0',
-                padding: 18,
-                userSelect: 'none',
-                position: 'relative',
-                textDecoration: 'none',
-                pointerEvents: 'none',
-                transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-                transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-                flexShrink: 0,
-              }}
+              to={`/event/${event.id}`}
+              style={{ textDecoration: 'none' }}
             >
-              <img
-                src={event.image_url}
-                alt={event.title}
-                width={CARD_WIDTH}
-                height={140}
+              <div
+                className="slider-card"
                 style={{
-                  width: CARD_WIDTH,
-                  height: 140,
-                  objectFit: 'cover',
-                  borderRadius: 8,
-                  marginBottom: 10,
-                  pointerEvents: 'none',
-                  transition: 'transform 0.2s ease',
-                  transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                  width: cardWidth,
+                  minWidth: cardWidth,
+                  maxWidth: cardWidth,
+                  background: '#23272f',
+                  color: '#fff',
+                  borderRadius: 14,
+                  boxShadow: isHovered ? '0 4px 20px 0 rgba(40,40,60,0.20)' : '0 2px 12px 0 rgba(40,40,60,0.10)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  margin: '10px 0',
+                  padding: 18,
+                  userSelect: 'none',
+                  position: 'relative',
+                  textDecoration: 'none',
+                  pointerEvents: 'auto',
+                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+                  transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+                  flexShrink: 0,
+                  cursor: 'pointer',
                 }}
-              />
-              <div style={{
-                fontWeight: 600,
-                fontSize: 18,
-                marginBottom: 8,
-                pointerEvents: 'none',
-                color: isHovered ? '#a78bfa' : '#fff',
-                transition: 'color 0.2s ease'
-              }}>
-                {event.title}
+              >
+                <img
+                  src={event.image_url}
+                  alt={event.title}
+                  width={cardWidth}
+                  height={140}
+                  style={{
+                    width: cardWidth,
+                    height: 140,
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    marginBottom: 10,
+                    pointerEvents: 'none',
+                    transition: 'transform 0.2s ease',
+                    transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                  }}
+                />
+                <div style={{
+                  fontWeight: 600,
+                  fontSize: 18,
+                  marginBottom: 8,
+                  pointerEvents: 'none',
+                  color: isHovered ? '#a78bfa' : '#fff',
+                  transition: 'color 0.2s ease'
+                }}>
+                  {event.title}
+                </div>
+                <div style={{
+                  fontSize: 14,
+                  color: isHovered ? '#ccc' : '#aaa',
+                  pointerEvents: 'none',
+                  transition: 'color 0.2s ease'
+                }}>
+                  {event.description}
+                </div>
               </div>
-              <div style={{
-                fontSize: 14,
-                color: isHovered ? '#ccc' : '#aaa',
-                pointerEvents: 'none',
-                transition: 'color 0.2s ease'
-              }}>
-                {event.description}
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -79,22 +79,22 @@ function HomePage() {
                     pointerEvents: isFull ? 'none' : 'auto',
                     position: 'relative',
                   }}>
-                    {isFull && (
-                      <div style={{
-                        position: 'absolute',
-                        top: 10,
+                  {isFull && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 10,
                         left: 0,
-                        background: '#f87171',
-                        color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '0.95rem',
-                        padding: '4px 12px',
-                        borderRadius: 6,
-                        zIndex: 2,
-                        boxShadow: '0 2px 8px 0 rgba(40,40,60,0.10)'
-                      }}>SOLD OUT</div>
-                    )}
-                    {event.image_url && (
+                      background: '#f87171',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
+                      padding: '4px 12px',
+                      borderRadius: 6,
+                      zIndex: 2,
+                      boxShadow: '0 2px 8px 0 rgba(40,40,60,0.10)'
+                    }}>SOLD OUT</div>
+                  )}
+                  {event.image_url && (
                       <img
                         src={event.image_url}
                         alt={event.title}
@@ -113,7 +113,7 @@ function HomePage() {
                       <div style={{ fontSize: 14, color: '#888' }}>Max bookings per slot: {event.max_bookings_per_slot}</div>
                     </div>
                   </li>
-                </Link>
+                  </Link>
               );
             })}
           </ul>

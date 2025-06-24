@@ -10,6 +10,15 @@
   box-sizing: border-box;
 }
 
+/* Responsive form container */
+@media (max-width: 480px) {
+  .form-container {
+    max-width: 90%;
+    margin: 1rem auto;
+    padding: 1.5rem 0.75rem;
+  }
+}
+
 .title {
   text-align: center;
   font-size: 1.5rem;
@@ -41,6 +50,7 @@
   background-color: rgba(17, 24, 39, 1);
   padding: 0.75rem 1rem;
   color: rgba(243, 244, 246, 1);
+  box-sizing: border-box;
 }
 
 .input-group input:focus {
@@ -208,7 +218,18 @@
   font-size: 1rem;
   margin-bottom: 0.5rem;
   transition: border 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+  max-width: 100%;
 }
+
+/* Responsive input styling */
+@media (max-width: 480px) {
+  .input-polished {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
+}
+
 .input-polished:focus {
   border: 1.5px solid #a78bfa;
   box-shadow: 0 0 0 2px #a78bfa33;

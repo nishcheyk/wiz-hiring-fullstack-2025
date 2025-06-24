@@ -23,12 +23,14 @@ export async function migrate() {
         description TEXT,
         max_bookings_per_slot INTEGER NOT NULL,
         position INTEGER DEFAULT 0,
-        image_url TEXT
+        image_url TEXT,
+        date TIMESTAMP NOT NULL
       );
       CREATE TABLE IF NOT EXISTS slots (
         id SERIAL PRIMARY KEY,
         event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-        start_time TIMESTAMP NOT NULL
+        start_time TIMESTAMP NOT NULL,
+        available_spots INTEGER NOT NULL
       );
       CREATE TABLE IF NOT EXISTS bookings (
         id SERIAL PRIMARY KEY,

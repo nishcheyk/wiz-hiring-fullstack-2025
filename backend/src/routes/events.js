@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
     }
     res.status(201).json({ id: eventId });
   } catch (err) {
-    console.error('Error in POST /events:', err); // Log the real error
+    console.error('Error in POST /events:', err);
     res.status(500).json({ error: 'Failed to create event' });
   }
 });
@@ -71,10 +71,23 @@ router.get('/:id', async (req, res) => {
     const eventResult = await db.query('SELECT * FROM events WHERE id = $1', [req.params.id]);
     const event = eventResult.rows[0];
     if (!event) return res.status(404).json({ error: 'Event not found' });
-    const slotsResult = await db.query('SELECT * FROM slots WHERE event_id = $1', [req.params.id]);
+
+    // Get slots with booking count information
+    const slotsResult = await db.query(`
+      SELECT s.*,
+             COUNT(b.id) as booked_count,
+             s.available_spots - COUNT(b.id) as remaining_spots
+      FROM slots s
+      LEFT JOIN bookings b ON s.id = b.slot_id
+      WHERE s.event_id = $1
+      GROUP BY s.id, s.available_spots
+      ORDER BY s.start_time ASC
+    `, [req.params.id]);
+
     const slots = slotsResult.rows;
     res.json({ ...event, slots });
   } catch (err) {
+    console.error('Error fetching event:', err);
     res.status(500).json({ error: 'Failed to fetch event' });
   }
 });
