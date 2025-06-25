@@ -97,24 +97,10 @@ async function seed() {
         image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
       },
       {
-        title: 'History Buffs Meetup',
-        description: 'Dive into history with fellow enthusiasts and guest historians.',
-        max_bookings_per_slot: 20,
-        position: 8,
-        image_url: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
-      },
-      {
-        title: 'Romance Readers Gathering',
-        description: 'Share your favorite romance novels and authors in this cozy gathering.',
-        max_bookings_per_slot: 18,
-        position: 9,
-        image_url: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
-      },
-      {
         title: 'Non-Fiction Night',
         description: 'Discuss biographies, memoirs, and more with engaging presentations.',
         max_bookings_per_slot: 25,
-        position: 10,
+        position: 8,
         image_url: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
       },
     ];
